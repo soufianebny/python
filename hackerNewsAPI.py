@@ -4,7 +4,7 @@ import requests,sys
 from operator import itemgetter
 
 '''
-Description: Get top stories from news.ycombinator.com (API doc: https://github.com/HackerNews/API).
+Description: Get best stories from news.ycombinator.com (API doc: https://github.com/HackerNews/API).
 
 Input:
      arg1 = number of articles to fetch. Default 10.
@@ -15,24 +15,24 @@ Examples:
 hackerNewsAPI.py 5
 '''
 
-def getTopStoriesID(nb_article):
-    ''' Get IDs of top stories '''
+def get_best_stories_ids(nb_article):
+    ''' get IDs of best stories '''
     try:
-        r = requests.get('https://hacker-news.firebaseio.com/v0/topstories.json')
+        r = requests.get('https://hacker-news.firebaseio.com/v0/beststories.json')
         r.raise_for_status()
     except requests.exceptions.RequestException as error:
         print(error)
         sys.exit(1)
     response = r.json()
-    top_article_IDs = []
+    best_article_IDs = []
     for article in response[:nb_article]:
-        top_article_IDs.append(article)
-    return top_article_IDs
+        best_article_IDs.append(article)
+    return best_article_IDs
 
-def getStoriesInfos(top_stories_IDs):
-    '''using ID, for each ID (each story) get its informaton (title, ...etc)'''
+def get_stories_by_id(best_stories_IDs):
+    ''' get information (title, url, ...) of stories by ID '''
     stories = []
-    for story_id in top_stories_IDs:
+    for story_id in best_stories_IDs:
         stories_dict = {}
         try:
             r = requests.get(f'https://hacker-news.firebaseio.com/v0/item/{story_id}.json')
@@ -47,7 +47,8 @@ def getStoriesInfos(top_stories_IDs):
         # without using list, the dict will be overwrited each time (because we use the same Keys)
         stories_dict["Title"] = response["title"]
         stories_dict["Score"] = response["score"]
-        stories_dict["Link"] = response["url"]
+        #work-around: sometimes stories miss url section
+        stories_dict["Link"] = response["url"] if "url" in response else "None"
         stories.append(stories_dict)
 
     #sort by Score
@@ -70,5 +71,5 @@ def arg_parser():
             sys.exit(1)
     return nb_article
 
-top_stories = getTopStoriesID(arg_parser())
-getStoriesInfos(top_stories)
+best_stories = get_best_stories_ids(arg_parser())
+get_stories_by_id(best_stories)
