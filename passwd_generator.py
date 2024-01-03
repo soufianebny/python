@@ -5,7 +5,7 @@ Description: Script to generate a random password/passphrase.
 
 Input:
     password length. Default 20.
-    generator type, simple or complex. Default complex.
+    generator type, simple, complex or randsample. Default randsample.
     boolean switch to enable password analysis.
 
 Examples:
@@ -95,6 +95,11 @@ def complex_passwd_generator(passwd_length):
 
     return randomizer(passwd_generated)
 
+def randsample_passwd_generator(passwd_length):
+    randomized_source = randomizer(source)
+    passwd_generated = random.sample(randomized_source,passwd_length)
+    return randomizer(passwd_generated)
+
 def password_analyzer(passwd_to_analyze):
     digit_count=0
     lower_count=0
@@ -123,17 +128,20 @@ def password_analyzer(passwd_to_analyze):
           )
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-t', '--type', type=str, required=False, default="complex", choices=['simple','complex'], 
+parser.add_argument('-t', '--type', type=str, required=False, default="randsample", choices=['simple','complex','randsample'],
                     help="Choose between simple and complex password generator.")
 parser.add_argument('-l', '--length', type=int, required=False, default=20, help="(optional) set password length.")
 parser.add_argument('-a', '--analyse', action='store_true', required=False, help="(optional) show password analysis.")
 args = parser.parse_args()
 if args.type == "simple":
     passwd = passwd_generator(args.length)
-else:
+elif args.type == "complex":
     passwd = complex_passwd_generator(args.length)
+else:
+    passwd = randsample_passwd_generator(args.length)
 
 if args.analyse:
     password_analyzer(passwd)
 else:
     print(passwd)
+
